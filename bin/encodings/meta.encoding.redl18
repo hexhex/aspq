@@ -1,0 +1,48 @@
+% ----- extract -----
+atom(Index, X) :- head(Index, R, X), index(Index).
+atom(Index, X) :- bodyP(Index, R, X), index(Index).
+atom(Index, X) :- bodyN(Index, R, X), index(Index).
+rule(Index, R) :- head(Index, R, X), index(Index).
+rule(Index, R) :- bodyP(Index, R, X), index(Index).
+rule(Index, R) :- bodyN(Index, R, X), index(Index).
+
+% ----- Optimization: compute potentially applicable rules -----
+%potentiallyDerivable(Index, X) :- head(Index, R, X), potentiallyApplicableRule(Index, R).
+%potentiallyApplicableRule(Index, R) :- rule(Index, R), potentiallyDerivable(Index, X) : bodyP(Index, R, X).
+potentiallyApplicableRule(Index, R) :- rule(Index, R).
+
+% ----- guess -----
+true(Index, X) | false(Index, X) :- atom(Index, X), index(Index).
+%true(Index, X) :- potentiallyApplicableRule(Index, R), head(Index, R, X),                                                                                                               % optimization: rules with satisfied bodies fire
+%                  true(Index, Y) : bodyP(Index, R, Y);
+%                  false(Index, Y) : bodyP(Index, R,Y).
+
+% ----- check -----
+inReduct(Index, R) :- potentiallyApplicableRule(Index, R), false(Index, X) : bodyN(Index, R, X), index(Index).
+outReduct(Index, R) :- potentiallyApplicableRule(Index, R), bodyN(Index, R, X), true(Index, X), index(Index).
+
+% simulate immediate consequence operator
+steps(Index, 0..S) :- S = #count{ X : atom(Index, X) }, index(Index).
+stepCount(Index, S) :- S = #count{ X : atom(Index, X) }, index(Index).
+out(Index, X, 0) :- atom(Index, X).                                                                                                                                                     % before the first iteration everything is out
+in(Index, X, NextStep) :- inReduct(Index, R), head(Index, R, X), steps(Index, Step), steps(Index, NextStep), NextStep = Step + 1, in(Index, A, Step) : bodyP(Index, R, A).              % atom becomes derivable
+notApplicable(Index, R, Step) :- steps(Index, Step), outReduct(Index, R).                                                                                                               % rule is not applicable in any step if it is not even in the reduct
+notApplicable(Index, R, Step) :- bodyP(Index, R, A), out(Index, R, Step).                                                                                                               % rule is not applicable in Step if a positive body atom is not derived yet
+out(Index, X, NextStep) :- out(Index, X, Step), steps(Index, NextStep), NextStep = Step + 1, notApplicable(Index, R, Step) : head(Index, R, X), potentiallyApplicableRule(Index, R).    % atom still not derivable if no rule which derived it is applicable
+inMinModel(Index, X) :- in(Index, X, S), stepCount(Index, S).
+outMinModel(Index, X) :- out(Index, X, S), stepCount(Index, S).
+
+% compare
+noAS(Index) :- true(Index, X), outMinModel(Index, X).
+noAS(Index) :- false(Index, X), inMinModel(Index, X).
+
+% ----- saturate -----
+true(Index, X) :- atom(Index, X), noAS(Index), index(Index).
+false(Index, X) :- atom(Index, X), noAS(Index), index(Index).
+inReduct(Index, R) :- potentiallyApplicableRule(Index, R), noAS(Index), index(Index).
+outReduct(Index, R) :- potentiallyApplicableRule(Index, R), noAS(Index), index(Index).
+notApplicable(Index, R, Step) :- potentiallyApplicableRule(Index, R), noAS(Index), steps(Index, Step), index(Index).
+in(Index, X, Step) :- atom(Index, X), noAS(Index), steps(Index, Step), index(Index).
+out(Index, X, Step) :- atom(Index, X), noAS(Index), steps(Index, Step), index(Index).
+inMinModel(Index, X) :- atom(Index, X), noAS(Index), index(Index).
+outMinModel(Index, X) :- atom(Index, X), noAS(Index), index(Index).

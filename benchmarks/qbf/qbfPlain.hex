@@ -1,0 +1,17 @@
+t(X) | f(X) :- exists(X).
+t(X) | f(X) :- forall(X).
+t(true).
+f(false).
+sat :- term(0, X, 0, Y, 0, Z), f(X), f(Y), f(Z).
+sat :- term(1, X, 0, Y, 0, Z), t(X), f(Y), f(Z).
+sat :- term(0, X, 1, Y, 0, Z), f(X), t(Y), f(Z).
+sat :- term(0, X, 0, Y, 1, Z), f(X), f(Y), t(Z).
+sat :- term(1, X, 1, Y, 0, Z), t(X), t(Y), f(Z).
+sat :- term(1, X, 0, Y, 1, Z), t(X), f(Y), t(Z).
+sat :- term(0, X, 1, Y, 1, Z), f(X), t(Y), t(Z).
+sat :- term(1, X, 1, Y, 1, Z), t(X), t(Y), t(Z).
+t(X) :- sat, forall(X).
+f(X) :- sat, forall(X).
+:- not sat.
+
+#show t/1.

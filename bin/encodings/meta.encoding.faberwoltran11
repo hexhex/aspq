@@ -1,0 +1,17 @@
+% ----- extract -----
+atom(Index, X) :- head(Index, R, X), index(Index).
+atom(Index, X) :- bodyP(Index, R, X), index(Index).
+atom(Index, X) :- bodyN(Index, R, X), index(Index).
+rule(Index, R) :- head(Index, R, X), index(Index).
+rule(Index, R) :- bodyP(Index, R, X), index(Index).
+rule(Index, R) :- bodyN(Index, R, X), index(Index).
+
+% copy program for each atom
+%copy(Index, Atom) :- atom(Index,Atom).
+
+% evaluate original program
+true(Index,Atom,H) :- copy(Index, Atom), head(Index,R,H), true(Index,Atom,BP) : bodyP(Index,R,BP); not true(Index,Atom,BN) : bodyN(Index,R,BN); consistent(Index), index(Index).
+
+% subprogram can be consistent or inconsistent
+consistent(Index) :- not inconsistent(Index), index(Index).
+inconsistent(Index) :- not consistent(Index), index(Index).

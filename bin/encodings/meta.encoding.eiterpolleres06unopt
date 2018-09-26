@@ -1,0 +1,66 @@
+rule(Index,R,L) :- head(Index,R,L), not bodyP(Index,R,L), not bodyN(Index,R,L), index(Index).
+ruleBefore(Index,R,L) :- rule(Index,R,L), rule(Index,R1,L), R1 < R, index(Index).
+ruleAfter(Index,R,L) :- rule(Index,R,L), rule(Index,R1,L), R < R1, index(Index).
+ruleBetween(Index,R1,R2,L) :- rule(Index,R1,L), rule(Index,R2,L), rule(Index,R3,L), R1 < R3, R3 < R2, index(Index).
+firstRule(Index,R,L) :- rule(Index,R,L), not ruleBefore(Index,R,L), index(Index).
+lastRule(Index,R,L) :- rule(Index,R,L), not ruleAfter(Index,R,L), index(Index).
+nextRule(Index,R1,R2,L) :- rule(Index,R1,L), rule(Index,R2,L), R1 < R2, not ruleBetween(Index,R1,R2,L), index(Index).
+before(Index,h,R,L) :- head(Index,R,L), head(Index,R,L1), L1 < L, index(Index).
+after(Index,h,R,L) :- head(Index,R,L), head(Index,R,L1), L < L1, index(Index).
+between(Index,h,R,L,L2) :- head(Index,R,L), head(Index,R,L1), head(Index,R,L2), L<L1, L1<L2, index(Index).
+next(Index,h,R,L,L1) :- head(Index,R,L), head(Index,R,L1), L < L1, not between(Index,h,R,L,L1), index(Index).
+first(Index,h,R,L) :- head(Index,R,L), not before(Index,h,R,L), index(Index).
+last(Index,h,R,L) :- head(Index,R,L), not after(Index,h,R,L), index(Index).
+before(Index,p,R,L) :- bodyP(Index,R,L), bodyP(Index,R,L1), L1 < L, index(Index).
+after(Index,p,R,L) :- bodyP(Index,R,L), bodyP(Index,R,L1), L < L1, index(Index).
+between(Index,p,R,L,L2) :- bodyP(Index,R,L), bodyP(Index,R,L1), bodyP(Index,R,L2), L<L1, L1<L2, index(Index).
+next(Index,p,R,L,L1) :- bodyP(Index,R,L), bodyP(Index,R,L1), L < L1, not between(Index,p,R,L,L1), index(Index).
+first(Index,p,R,L) :- bodyP(Index,R,L), not before(Index,p,R,L), index(Index).
+last(Index,p,R,L) :- bodyP(Index,R,L), not after(Index,p,R,L), index(Index).
+before(Index,n,R,L) :- bodyN(Index,R,L), bodyN(Index,R,L1), L1 < L, index(Index).
+after(Index,n,R,L) :- bodyN(Index,R,L), bodyN(Index,R,L1), L < L1, index(Index).
+between(Index,n,R,L,L2) :- bodyN(Index,R,L), bodyN(Index,R,L1), bodyN(Index,R,L2), L<L1, L1<L2, index(Index).
+next(Index,n,R,L,L1) :- bodyN(Index,R,L), bodyN(Index,R,L1), L < L1, not between(Index,n,R,L,L1), index(Index).
+first(Index,n,R,L) :- bodyN(Index,R,L), not before(Index,n,R,L), index(Index).
+last(Index,n,R,L) :- bodyN(Index,R,L), not after(Index,n,R,L), index(Index).
+hlit(Index,L) :- rule(Index,R,L), index(Index).
+inS(Index,L) | ninS(Index,L) :- hlit(Index,L), index(Index).
+ninS(Index,L) :- bodyP(Index,R,L), not hlit(Index,L), index(Index).
+ninS(Index,L) :- bodyN(Index,R,L), not hlit(Index,L), index(Index).
+inS(Index,L) :- rule(Index,R,L), inS(Index,L1) : bodyP(Index,R,L1); ninS(Index,L1) : bodyN(Index,R,L1); index(Index).
+phi(Index,L,L1) | phi(Index,L1,L) :- inS(Index,L), inS(Index,L1), L < L1.
+phi(Index,L,L2) :- phi(Index,L,L1), phi(Index,L1,L2), index(Index).
+allInSUpto(Index,p,R,Min) :- inS(Index,Min), first(Index,p,R,Min), index(Index).
+allInSUpto(Index,p,R,L1) :- inS(Index,L1), allInSUpto(Index,p,R,L), next(Index,p,R,L,L1), index(Index).
+allInS(Index,p,R) :- allInSUpto(Index,p,R,Max),last(Index,p,R,Max), index(Index).
+allNinSUpto(Index,h,R,Min) :- ninS(Index,Min), first(Index,h,R,Min), index(Index).
+allNinSUpto(Index,h,R,L1) :- ninS(Index,L1), allNinSUpto(Index,h,R,L), next(Index,h,R,L,L1), index(Index).
+allNinSUpto(Index,n,R,Min) :- ninS(Index,Min), first(Index,n,R,Min), index(Index).
+allNinSUpto(Index,n,R,L1) :- ninS(Index,L1), allNinSUpto(Index,n,R,L), next(Index,n,R,L,L1), index(Index).
+allNinS(Index,h,R) :- allNinSUpto(Index,h,R,Max), last(Index,h,R,Max), index(Index).
+allNinS(Index,n,R) :- allNinSUpto(Index,n,R,Max), last(Index,n,R,Max), index(Index).
+hasHead(Index,R) :- head(Index,R,L), index(Index).
+hasPBody(Index,R) :- bodyP(Index,R,L), index(Index).
+hasNBody(Index,R) :- bodyN(Index,R,L), index(Index).
+allNinS(Index,h,R) :- head(Index,R,L), not hasHead(Index,R), index(Index).
+allInS(Index,p,R) :- head(Index,R,L), not hasPBody(Index,R), index(Index).
+allNinS(Index,n,R) :- head(Index,R,L), not hasNBody(Index,R), index(Index).
+noAS(Index) :- allNinS(Index,h,R), allInS(Index,p,R), allNinS(Index,n,R), head(Index,R,L), index(Index).
+allNinS(Index,h,R) :- bodyP(Index,R,L), not hasHead(Index,R), index(Index).
+allInS(Index,p,R) :- bodyP(Index,R,L), not hasPBody(Index,R), index(Index).
+allNinS(Index,n,R) :- bodyP(Index,R,L), not hasNBody(Index,R), index(Index).
+noAS(Index) :- allNinS(Index,h,R), allInS(Index,p,R), allNinS(Index,n,R), bodyP(Index,R,L), index(Index).
+allNinS(Index,h,R) :- bodyN(Index,R,L), not hasHead(Index,R), index(Index).
+allInS(Index,p,R) :- bodyN(Index,R,L), not hasPBody(Index,R), index(Index).
+allNinS(Index,n,R) :- bodyN(Index,R,L), not hasNBody(Index,R), index(Index).
+noAS(Index) :- allNinS(Index,h,R), allInS(Index,p,R), allNinS(Index,n,R), bodyN(Index,R,L), index(Index).
+failsToProve(Index,R,L) :- rule(Index,R,L), bodyP(Index,R,L1), ninS(Index,L1), index(Index).
+failsToProve(Index,R,L) :- rule(Index,R,L), bodyN(Index,R,L1), inS(Index,L1), index(Index).
+failsToProve(Index,R,L) :- rule(Index,R,L), rule(Index,R,L1), inS(Index,L1), L1 != L, inS(Index,L), index(Index).
+failsToProve(Index,R,L) :- rule(Index,R,L), bodyP(Index,R,L1), phi(Index,L1,L), index(Index).
+allFailUpto(Index,R,L) :- failsToProve(Index,R,L), firstRule(Index,R,L), index(Index).
+allFailUpto(Index,R1,L) :- failsToProve(Index,R1,L), allFailUpto(Index,R,L), nextRule(Index,R,R1,L), index(Index).
+noAS(Index) :- allFailUpto(Index,R,L), lastRule(Index,R,L), inS(Index,L), index(Index).
+phi(Index,L,L1) :- noAS(Index), hlit(Index,L), hlit(Index,L1), index(Index).
+inS(Index,L) :- noAS(Index), hlit(Index,L), index(Index).
+ninS(Index,L) :- noAS(Index), hlit(Index,L), index(Index).

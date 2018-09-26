@@ -1,0 +1,14 @@
+tt(X) :- input(t(X)).
+ff(X) :- input(f(X)).
+tt(X) :- input(forall(X)), not ff(X).
+ff(X) :- input(forall(X)), not tt(X).
+tt(true).
+ff(false).
+sat :- input(term(0, X, 0, Y, 0, Z)), ff(X), ff(Y), ff(Z).
+sat :- input(term(1, X, 0, Y, 0, Z)), tt(X), ff(Y), ff(Z).
+sat :- input(term(0, X, 1, Y, 0, Z)), ff(X), tt(Y), ff(Z).
+sat :- input(term(0, X, 0, Y, 1, Z)), ff(X), ff(Y), tt(Z).
+sat :- input(term(1, X, 1, Y, 0, Z)), tt(X), tt(Y), ff(Z).
+sat :- input(term(1, X, 0, Y, 1, Z)), tt(X), ff(Y), tt(Z).
+sat :- input(term(0, X, 1, Y, 1, Z)), ff(X), tt(Y), tt(Z).
+sat :- input(term(1, X, 1, Y, 1, Z)), tt(X), tt(Y), tt(Z).

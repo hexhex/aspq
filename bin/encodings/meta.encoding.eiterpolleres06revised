@@ -1,0 +1,62 @@
+% ----- extract -----
+atom(Index, X) :- head(Index, R, X), index(Index).
+atom(Index, X) :- bodyP(Index, R, X), index(Index).
+atom(Index, X) :- bodyN(Index, R, X), index(Index).
+rule(Index, R) :- head(Index, R, X), index(Index).
+rule(Index, R) :- bodyP(Index, R, X), index(Index).
+rule(Index, R) :- bodyN(Index, R, X), index(Index).
+
+% ----- Optimization: compute potentially applicable rules -----
+%potentiallyDerivable(Index, X) :- head(Index, R, X), potentiallyApplicableRule(Index, R).
+%potentiallyApplicableRule(Index, R) :- rule(Index, R), potentiallyDerivable(Index, X) : bodyP(Index, R, X). 
+potentiallyApplicableRule(Index, R) :- rule(Index, R).                                                                                     % opt_pa
+
+% ----- guess -----
+true(Index, X) | false(Index, X) :- atom(Index, X), index(Index).
+true(Index, X) :- potentiallyApplicableRule(Index, R), head(Index, R, X),                                                                  % opt_mod: rules with satisfied bodies fire
+                  true(Index, Y) : bodyP(Index, R, Y);
+                  false(Index, Y) : bodyN(Index, R, Y).
+
+% ----- check -----
+inReduct(Index, R) :- potentiallyApplicableRule(Index, R), false(Index, X) : bodyN(Index, R, X), index(Index).
+outReduct(Index, R) :- potentiallyApplicableRule(Index, R), bodyN(Index, R, X), true(Index, X), index(Index).
+
+% opt_dep: the derivation sequence is only relevant for atoms which depend on each other in a head-body relation
+dirdep(Index, X, Z) :- head(Index, R, X), bodyP(Index, R, Z), index(Index).
+dirdep(Index, X, Z) :- head(Index, R, X), bodyP(Index, R, Y), dirdep(Index, Y, Z), index(Index).
+dep(Index, X, Y) :- dirdep(Index, X, Y), dirdep(Index, Y, X).
+%dep(Index, X, Y) :- true(Index, X), true(Index, Y).
+
+% guess derivation sequence
+derivationSeq(Index, X, Y) | derivationSeq(Index, Y, X) :- true(Index, X), true(Index, Y), X < Y, dep(Index, X, Y), index(Index).
+derivationSeq(Index, X, Z) :- derivationSeq(Index, X, Y), derivationSeq(Index, Y, Z), dep(Index, X, Z), index(Index).
+
+% To eliminate redundant solutions in the non-saturated case, we require atoms to be derived in lexicographic order whenever possible.
+% Precisely: if an atom X1 becomes derivable by a rule r (i.e., all positive body atoms of r are derived before X1),
+% then X1 must be derived before any lexicographically larger atom X2 is derived.
+% Important: this does not destroy the saturation encoding because the saturated interpretation is just extended by
+% positive atoms, it is still unique, and still larger than all non-saturated models.
+%derivationSeq(Index, X1, X2) :- head(Index, R, X1), derivationSeq(Index, Y, X1) : bodyP(Index, R, Y);
+%                                atom(Index, X2), derivationSeq(Index, Y, X2) : bodyP(Index, R, Y);
+%                                X2 > X1, index(Index).
+%derivationSeq(Index, X1, X2) :- inReduct(Index, R1), inReduct(Index, R2),
+%                                head(Index, R1, X1), derivationSeq(Index, Y, X1) : bodyP(Index, R1, Y);
+%                                head(Index, R2, X2), derivationSeq(Index, Y, X2) : bodyP(Index, R1, Y);
+%                                X2 > X1, index(X).
+
+% identify rules which are not applicable for justifying its head atom being true
+notApp(Index, R) :- outReduct(Index, R), index(Index).                                                                                     % rule is not applicable if it is not in the reduct
+notApp(Index, R) :- inReduct(Index, R), bodyP(Index, R, X), false(Index, X), index(Index).                                                 % rule is not applicable if the positive body is not satisfied
+notApp(Index, R) :- head(Index, R, X1), bodyP(Index, R, X2), derivationSeq(Index, X1, X2).                                                 % rule is not applicable if head is derived earlier than one of the positive body atoms
+
+% check answer set candidate
+noAS(Index) :- true(Index, X), notApp(Index, R) : head(Index, R, X), index(Index).                                                         % guess is not a valid answer set if positive atom cannot be justified by a rule (minimality)
+%noAS(Index) :- inReduct(Index, R), head(Index, R, X), false(Index, X), true(Index, Y) : bodyP(Index, R, Y); index(Index).                 % guess is not a valid answer set if a rule is unsatisfied (not necessary with opt_mod)
+
+% ----- saturate -----
+true(Index, X) :- atom(Index, X), noAS(Index), index(Index).
+false(Index, X) :- atom(Index, X), noAS(Index), index(Index).
+derivationSeq(Index, X, Y) :- atom(Index, X), atom(Index, Y), noAS(Index), dep(Index, X, Y), index(Index).
+derivationSeq(Index, Y, X) :- atom(Index, X), atom(Index, Y), noAS(Index), dep(Index, X, Y), index(Index).
+inReduct(Index, R) :- potentiallyApplicableRule(Index, R), noAS(Index), index(Index).
+outReduct(Index, R) :- potentiallyApplicableRule(Index, R), noAS(Index), index(Index).

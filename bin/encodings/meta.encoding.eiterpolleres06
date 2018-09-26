@@ -1,0 +1,32 @@
+rule(Index,R,L) :- head(Index,R,L), not bodyP(Index,R,L), not bodyN(Index,R,L), index(Index).
+ruleBefore(Index,R,L) :- rule(Index,R,L), rule(Index,R1,L), R1 < R, index(Index).
+ruleAfter(Index,R,L) :- rule(Index,R,L), rule(Index,R1,L), R < R1, index(Index).
+ruleBetween(Index,R1,R2,L) :- rule(Index,R1,L), rule(Index,R2,L), rule(Index,R3,L), R1 < R3, R3 < R2, index(Index).
+firstRule(Index,R,L) :- rule(Index,R,L), not ruleBefore(Index,R,L), index(Index).
+lastRule(Index,R,L) :- rule(Index,R,L), not ruleAfter(Index,R,L), index(Index).
+nextRule(Index,R1,R2,L) :- rule(Index,R1,L), rule(Index,R2,L), R1 < R2, not ruleBetween(Index,R1,R2,L), index(Index).
+hlit(Index,L) :- rule(Index,R,L), index(Index).
+inS(Index,L) | ninS(Index,L) :- hlit(Index,L), index(Index).
+ninS(Index,L) :- bodyP(Index,R,L), not hlit(Index,L), index(Index).
+ninS(Index,L) :- bodyN(Index,R,L), not hlit(Index,L), index(Index).
+
+% opt_mod
+noAS(Index) :- inS(Index,L), ninS(Index,L).
+inS(Index,L) :- index(Index), head(Index,R,L), inS(Index,L1) : bodyP(Index,R,L1); ninS(Index,L2) : bodyN(Index,R,L2).
+
+% opt_dep
+dep(Index,L,L1) :- head(Index,R,L), bodyP(Index,R,L1), inS(Index,L), inS(Index,L1).                                       % begin optimization opt_dep
+dep(Index,L,L2) :- head(Index,R,L), bodyP(Index,R,L1), dep(Index,L1,L2), inS(Index,L).                                    % end optimization opt_dep
+phi(Index,L,L1) | phi(Index,L1,L) :- inS(Index,L), inS(Index,L1), L < L1, dep(Index,L,L1), dep(Index,L1,L), index(Index). % atoms "dep(Index,L,L1), dep(Index,L1,L)": optimization opt_dep
+phi(Index,L,L2) :- phi(Index,L,L1), phi(Index,L1,L2), index(Index), dep(L,L2).
+
+failsToProve(Index,R,L) :- rule(Index,R,L), bodyP(Index,R,L1), ninS(Index,L1), index(Index).
+failsToProve(Index,R,L) :- rule(Index,R,L), bodyN(Index,R,L1), inS(Index,L1), index(Index).
+failsToProve(Index,R,L) :- rule(Index,R,L), rule(Index,R,L1), inS(Index,L1), L1 != L, inS(Index,L), index(Index).
+failsToProve(Index,R,L) :- rule(Index,R,L), bodyP(Index,R,L1), phi(Index,L1,L), index(Index).
+allFailUpto(Index,R,L) :- failsToProve(Index,R,L), firstRule(Index,R,L), index(Index).
+allFailUpto(Index,R1,L) :- failsToProve(Index,R1,L), allFailUpto(Index,R,L), nextRule(Index,R,R1,L), index(Index).
+noAS(Index) :- allFailUpto(Index,R,L), lastRule(Index,R,L), inS(Index,L), index(Index).
+phi(Index,L,L1) :- noAS(Index), hlit(Index,L), hlit(Index,L1), index(Index).
+inS(Index,L) :- noAS(Index), hlit(Index,L), index(Index).
+ninS(Index,L) :- noAS(Index), hlit(Index,L), index(Index).
