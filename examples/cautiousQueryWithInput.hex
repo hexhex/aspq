@@ -1,0 +1,5 @@
+p(a) | p(b).
+ok :- CHEX[subprogram, p, qu]().
+
+#show p/1.
+#show ok/0.

@@ -10,6 +10,7 @@ if [[ "$1" = "-h" ]] | [[ $# -lt 3 ]]; then
          eiterpolleres06revised (TPLP 06 mod+dep, newly encoded with modern language features)
          redl18 (new encoding)
          faberwoltran11 (based on manifold programs)
+         external (based on nested HEX-programs)
   \$3: Main program
   \$4: Instance file(s)
   \$5ff: Additional parameters to the solver"

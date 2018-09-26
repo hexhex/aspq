@@ -1,0 +1,7 @@
+d(a).
+d(b).
+d(c).
+q(X) :- d(X), not p(X).
+p(X) :- d(X), not q(X).
+:- q(X).
+:- p(X).

@@ -1,0 +1,1 @@
+ok :- CHEX[inconsistentProgram, input, invalid]().
