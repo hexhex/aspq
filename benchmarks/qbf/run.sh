@@ -13,7 +13,7 @@ if [[ $all -eq 1 ]]; then
 	$bmscripts/runinsts.sh "instances/*.inst" "$mydir/run.sh" "$mydir" "$to" "" "" "$req"
 else
 	mydir=$(dirname $0)
-	confstr="$mydir/callclingo.sh qbfPlain.hex $instance;$mydir/../../Queries/aspq.sh dlvhex2 external qbfQueries.hex $instance;$mydir/../../Queries/aspq.sh potassco eiterpolleres06unopt qbfQueries.hex $instance;$mydir/../../Queries/aspq.sh potassco eiterpolleres06 qbfQueries.hex $instance;$mydir/../../Queries/aspq.sh potassco eiterpolleres06revised qbfQueries.hex $instance;$mydir/../../Queries/aspq.sh potassco redl18 qbfQueries.hex $instance;$mydir/../../Queries/aspq.sh potassco faberwoltran11 qbfQueries.hex $instance"
+	confstr="$mydir/callclingo.sh qbfPlain.hex $instance;$mydir/../../bin/aspq.sh dlvhex2 external qbfQueries.hex $instance;$mydir/../../bin/aspq.sh potassco eiterpolleres06unopt qbfQueries.hex $instance;$mydir/../../bin/aspq.sh potassco eiterpolleres06 qbfQueries.hex $instance;$mydir/../../bin/aspq.sh potassco eiterpolleres06revised qbfQueries.hex $instance;$mydir/../../bin/aspq.sh potassco redl18 qbfQueries.hex $instance;$mydir/../../bin/aspq.sh potassco faberwoltran11 qbfQueries.hex $instance"
 
 	$bmscripts/runconfigs.sh "CONF" "$confstr" "$instance" "$to" ""
 fi
