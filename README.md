@@ -1,5 +1,5 @@
 # aspq
-Reasoner frontend for Answer set programs with queries over subprograms
+Reasoner frontend for answer set programs with queries over subprograms
 
 This is a shell script based frontend for evaluating ASPq-programs based
 on Potassco or dlvhex2, using either one of different meta-programming encodings
