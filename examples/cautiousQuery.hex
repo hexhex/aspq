@@ -1,1 +1,1 @@
-ok :- CHEX[inconsistentProgram, input, invalid]().
+ok :- CQ[inconsistentProgram, input, invalid]().

@@ -2,8 +2,8 @@
 
 mydir=$(dirname $0)
 prog=$(cat $1 |
-	sed 's/CHEX *\[ *\([[:alnum:]]*\) *, *\([[:alnum:]]*\) *, *\([[:alnum:]]*\) *\] *( *)/noAS(S=pos, T=cautious, F=\1, I=\2, Q=\3)/g' |
-	sed 's/BHEX *\[ *\([[:alnum:]]*\) *, *\([[:alnum:]]*\) *, *\([[:alnum:]]*\) *\] *( *)/noAS(S=pos, T=brave, F=\1, I=\2, Q=\3)/g')
+	sed 's/CQ *\[ *\([[:alnum:]]*\) *, *\([[:alnum:]]*\) *, *\([[:alnum:]]*\) *\] *( *)/noAS(S=pos, T=cautious, F=\1, I=\2, Q=\3)/g' |
+	sed 's/BQ *\[ *\([[:alnum:]]*\) *, *\([[:alnum:]]*\) *, *\([[:alnum:]]*\) *\] *( *)/noAS(S=pos, T=brave, F=\1, I=\2, Q=\3)/g')
 
 # inline all queries
 queries=$(echo $prog | grep -o "noAS(S=[[:alnum:]]*, T=[[:alnum:]]*, F=[[:alnum:]]*, I=[[:alnum:]]*, Q=[[:alnum:]]*)")
@@ -42,5 +42,5 @@ done
 
 
 cat $1 |
-        sed 's/CHEX *\[ *\([[:alnum:]]*\) *, *\([[:alnum:]]*\) *, *\([[:alnum:]]*\) *\] *( *)/noAS(\1)/g' |
-        sed 's/BHEX *\[ *\([[:alnum:]]*\) *, *\([[:alnum:]]*\) *, *\([[:alnum:]]*\) *\] *( *)/not noAS(\1)/g'
+        sed 's/CQ *\[ *\([[:alnum:]]*\) *, *\([[:alnum:]]*\) *, *\([[:alnum:]]*\) *\] *( *)/noAS(\1)/g' |
+        sed 's/BQ *\[ *\([[:alnum:]]*\) *, *\([[:alnum:]]*\) *, *\([[:alnum:]]*\) *\] *( *)/not noAS(\1)/g'

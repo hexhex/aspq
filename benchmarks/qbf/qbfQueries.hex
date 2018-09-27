@@ -6,7 +6,7 @@ input(exists(X)) :- exists(X).
 input(forall(X)) :- forall(X).
 input(term(X, Y, Z, NX, NY, NZ)) :- term(X, Y, Z, NX, NY, NZ).
 
-allsat :- CHEX[qbfCheckForall, input, sat]().
+allsat :- CQ[qbfCheckForall, input, sat]().
 :- not allsat.
 
 %#show allsat/0.

@@ -55,7 +55,7 @@ elif [[ "$encoding" = "external" ]]; then
 		exit 1
 	fi
 	# rewrite query atoms to external atoms
-	cat $mainprog | sed 's/CHEX/\&testCautiousQuery/g' | sed 's/BHEX/\&testBraveQuery/g' > $inlinedprogram
+	cat $mainprog | sed 's/CQ/\&testCautiousQuery/g' | sed 's/BQ/\&testBraveQuery/g' > $inlinedprogram
 	solverparam="--plugindir=$mydir/../../core/testsuite $solverparam"
 	encodingfile=""
 else

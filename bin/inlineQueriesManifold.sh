@@ -2,8 +2,8 @@
 
 mydir=$(dirname $0)
 prog=$(cat $1 |
-	sed 's/CHEX *\[ *\([[:alnum:]]*\) *, *\([[:alnum:]]*\) *, *\([[:alnum:]]*\) *\] *( *)/query(S=pos, T=cautious, F=\1, I=\2, Q=\3)/g' |
-	sed 's/BHEX *\[ *\([[:alnum:]]*\) *, *\([[:alnum:]]*\) *, *\([[:alnum:]]*\) *\] *( *)/query(S=pos, T=brave, F=\1, I=\2, Q=\3)/g')
+	sed 's/CQ *\[ *\([[:alnum:]]*\) *, *\([[:alnum:]]*\) *, *\([[:alnum:]]*\) *\] *( *)/query(S=pos, T=cautious, F=\1, I=\2, Q=\3)/g' |
+	sed 's/BQ *\[ *\([[:alnum:]]*\) *, *\([[:alnum:]]*\) *, *\([[:alnum:]]*\) *\] *( *)/query(S=pos, T=brave, F=\1, I=\2, Q=\3)/g')
 
 # inline all queries
 queries=$(echo $prog | grep -o "query(S=[[:alnum:]]*, T=[[:alnum:]]*, F=[[:alnum:]]*, I=[[:alnum:]]*, Q=[[:alnum:]]*)")
@@ -49,5 +49,5 @@ done
 
 
 cat $1 |
-        sed 's/CHEX *\[ *\([[:alnum:]]*\) *, *\([[:alnum:]]*\) *, *\([[:alnum:]]*\) *\] *( *)/query(\1)/g' |
-        sed 's/BHEX *\[ *\([[:alnum:]]*\) *, *\([[:alnum:]]*\) *, *\([[:alnum:]]*\) *\] *( *)/query(\1)/g'
+        sed 's/CQ *\[ *\([[:alnum:]]*\) *, *\([[:alnum:]]*\) *, *\([[:alnum:]]*\) *\] *( *)/query(\1)/g' |
+        sed 's/BQ *\[ *\([[:alnum:]]*\) *, *\([[:alnum:]]*\) *, *\([[:alnum:]]*\) *\] *( *)/query(\1)/g'
