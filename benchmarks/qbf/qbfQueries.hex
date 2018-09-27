@@ -9,4 +9,4 @@ input(term(X, Y, Z, NX, NY, NZ)) :- term(X, Y, Z, NX, NY, NZ).
 allsat :- CQ[qbfCheckForall, input, sat]().
 :- not allsat.
 
-%#show allsat/0.
+#show allsat/0.
